@@ -38,18 +38,18 @@ app.use(express.static('assets'));
 app.get('/', function (req, res) {
     // console.log(req);
     Contact.find({})
-    .then(contacts => {
-        return res.render('home', {
-            title: "my contact list",
-            contact_List: contacts
+        .then(contacts => {
+            return res.render('home', {
+                title: "my contact list",
+                contact_List: contacts
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            return;
         });
-    })
-    .catch(err => {
-        console.log(err);
-        return;
-    });
-    
-    
+
+
 });
 
 
@@ -82,29 +82,36 @@ app.post('/createContact', function (req, res) {
         name: req.body.name,
         phone: req.body.phone
     })
-    .then(newContact => {
-        console.log('*****', newContact);
-        res.redirect('back');
-    })
-    .catch(err => {
-        console.log('error in creating Contact list', err);
-        return;
-    });
+        .then(newContact => {
+            console.log('*****', newContact);
+            res.redirect('back');
+        })
+        .catch(err => {
+            console.log('error in creating Contact list', err);
+            return;
+        });
     //this code is used to create a new contact in a contact list application and save the contact data to a MongoDB database using Mongoose.
 });
 
 //for deleting contact
 app.get('/delete-contact/', (req, res) => {
     //get the query from the url
-    let phone = req.query.phone;
-    let contactIndex = contactList.findIndex(contact => contact.phone == phone);
+    let id = req.query.id;
+    //find the contact in the db using id and delete it.
+    Contact.findByIdAndRemove(id)
+        .then(contact => {
+            if (!contact) {
+                console.log('Contact not found');
+                return res.redirect('back');
+            }
+            console.log('Successfully deleted:', contact);
+            return res.redirect('back');
+        })
+        .catch(err => {
+            console.log('error in deleting contact', err);
+            return res.redirect('back');
+        });
 
-
-    if (contactIndex > -1) {
-        contactList.splice(contactIndex, 1);
-
-    }
-    return res.redirect('back');
 
 });
 
